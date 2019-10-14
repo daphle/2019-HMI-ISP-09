@@ -1,0 +1,122 @@
+from pynq.overlays.base import BaseOverlay
+from pynq.lib.video import *
+
+base = BaseOverlay("base.bit")
+
+Mode = VideoMode(640,480,24)
+hdmi_out = base.video.hdmi_out
+hdmi_out.configure(Mode,PIXEL_BGR)
+#hdmi_in.start()
+hdmi_out.start()
+
+# monitor (output) frame buffer size
+frame_out_w = 640
+frame_out_h = 480
+# camera (input) configuration
+frame_in_w = 640
+frame_in_h = 480
+
+from time import sleep 
+import cv2
+import numpy as np
+#import face_recognition
+from matplotlib import pyplot as plt
+from PIL import Image
+from pylab import * 
+
+page=0
+Path ='/home/xilinx/jupyter_notebooks/base/video/book/'
+img1=array(Image.open(Path+'%s.jpg'%page))
+
+#开始显示电子书
+start_page = False
+
+
+while (base.buttons[3].read()==0):
+
+    # initialize camera from OpenCV
+    
+    panduan = False
+    
+    #右翻页
+    page_right = False
+    
+    #左翻页
+    page_left = False
+    
+    
+
+    while panduan is False:
+        videoIn = cv2.VideoCapture(0)
+        videoIn.set(cv2.CAP_PROP_FRAME_WIDTH, frame_in_w);
+        videoIn.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_in_h);
+        panduan = videoIn.isOpened()
+
+        #print("Capture device is open: " + str(videoIn.isOpened()))
+
+        # Capture webcam image
+        
+    
+    ret, frame_vga = videoIn.read()
+    
+    # Display webcam image via HDMI Out
+    if (ret):      
+        outframe = hdmi_out.newframe()
+        outframe[0:480,0:640,:] = frame_vga[0:480,0:640,:]
+        
+        #hdmi_out.writeframe(outframe)
+    else:
+        raise RuntimeError("Failed to read from camera.")
+        
+
+    # Output webcam image as JPEG
+    #%matplotlib inline 
+    
+    #plt.imshow(frame_vga[:,:,[2,1,0]])
+    #plt.show()
+    
+
+    profileface_cascade = cv2.CascadeClassifier(
+        '/home/xilinx/jupyter_notebooks/base/video/data/'
+        'haarcascade_profileface.xml')
+
+    gray = cv2.cvtColor(frame_vga, cv2.COLOR_BGR2GRAY)
+    #将灰度图像数组转为灰度图片
+    gray1 = Image.fromarray(gray)
+    #翻转后的图片
+    gray2 = gray1.transpose(Image.FLIP_LEFT_RIGHT)
+    #生成翻转后的图片转数组
+    gray_fanzhuan = array(gray2)
+    
+    
+    #11.1
+    #faces = face_cascade.detectMultiScale(gray, 2.2, 5)
+    profilefaces = profileface_cascade.detectMultiScale(gray, 2.7, 5)
+    profileface_rights = profileface_cascade.detectMultiScale(gray_fanzhuan, 2.5, 5)
+    
+    #检测左脸
+    for (px,py,pw,ph) in profilefaces:
+        page_right=True
+        cv2.rectangle(frame_vga,(px,py),(px+pw,py+ph),(255,193,193),2)
+        cv2.putText(frame_vga, "right page", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
+        #cv2.putText(img1, "right page", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
+    
+    #检测右脸
+    for (rx,ry,rw,rh) in profileface_rights:
+        page_left=True
+        cv2.rectangle(frame_vga,(640-rx,ry),(640-rx-rw,ry+rh),(153,50,204),2)
+        cv2.putText(frame_vga, "left page", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
+        #cv2.putText(img1, "left page", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
+
+    
+      # Output OpenCV results via matplotlib
+    %matplotlib inline           
+                
+                
+
+
+for led in base.leds: 
+    led.on()
+videoIn.release()
+hdmi_out.stop()
+del hdmi_out
