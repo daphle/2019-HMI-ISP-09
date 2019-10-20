@@ -2,23 +2,23 @@ import cv2
 from selenium import webdriver
 import time
 x=webdriver.Chrome(r'C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe') 
-#ÕâÊÇÎÒµÄchromedriverµÄ¾ø¶ÔÂ·¾¶£¬ÎÒÊÇÄ¬ÈÏ°²×°µÄ£¬ËùÒÔ¿ÉÒÔ×÷ÎªĞÂÊÖµÄ²Î¿¼
+#è¿™æ˜¯æˆ‘çš„chromedriverçš„ç»å¯¹è·¯å¾„ï¼Œæˆ‘æ˜¯é»˜è®¤å®‰è£…çš„ï¼Œæ‰€ä»¥å¯ä»¥ä½œä¸ºæ–°æ‰‹çš„å‚è€ƒ
 x.get('http://www.baidu.com')
 
-#Í¨¹ıIDÕÒÍøÒ³µÄ±êÇ©£¬ÕÒµ½ËÑË÷¿òµÄ±êÇ© ? ?
+#é€šè¿‡IDæ‰¾ç½‘é¡µçš„æ ‡ç­¾ï¼Œæ‰¾åˆ°æœç´¢æ¡†çš„æ ‡ç­¾ ? ?
 seek_input=x.find_element_by_id("kw")
-#ÉèÖÃËÑË÷µÄÄÚÈİ ? ?
-seek_input.send_keys("ÌìÆø")
-#ÕÒµ½ËÑË÷ÎÄµµ°´Å¥ ? ?
+#è®¾ç½®æœç´¢çš„å†…å®¹ ? ?
+seek_input.send_keys("å¤©æ°”")
+#æ‰¾åˆ°æœç´¢æ–‡æ¡£æŒ‰é’® ? ?
 seek_but=x.find_element_by_id("su")
-#²¢µã»÷ËÑË÷ °´Å¥ ? ?
+#å¹¶ç‚¹å‡»æœç´¢ æŒ‰é’® ? ?
 seek_but.click()
-#²¢µã»÷ËÑË÷ °´Å¥ ? ?
+#å¹¶ç‚¹å‡»æœç´¢ æŒ‰é’® ? ?
 js="var q=document.documentElement.scrollTop=10000"
 time.sleep(2)
 x.execute_script(js)
 time.sleep(1)
-result = x.find_element_by_link_text("ÏÂÒ»Ò³>")
+result = x.find_element_by_link_text("ä¸‹ä¸€é¡µ>")
 #result.click()
 #time.sleep(2)
 
@@ -33,9 +33,9 @@ profileface_cascade = cv2.CascadeClassifier(
 
 capture = cv2.VideoCapture(0)
 while(True):
-    # »ñÈ¡Ò»Ö¡
+    # è·å–ä¸€å¸§
     ret, frame = capture.read()
-    # ½«ÕâÖ¡×ª»»Îª»Ò¶ÈÍ¼
+    # å°†è¿™å¸§è½¬æ¢ä¸ºç°åº¦å›¾
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray1 = cv2.flip(gray, 1)
     
@@ -43,18 +43,18 @@ while(True):
     profilefaces = profileface_cascade.detectMultiScale(gray, 2.1, 5)
     profileface_rights = profileface_cascade.detectMultiScale(gray1, 2, 5)
 
-    #¼ì²â×óÁ³
+    #æ£€æµ‹å·¦è„¸
     for (px,py,pw,ph) in profilefaces:
         page_right=True
         close_eyes=False
         cv2.rectangle(frame,(px,py),(px+pw,py+ph),(255,193,193),2)
         cv2.putText(frame, "right page", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
-        #result = x.find_element_by_link_text("ÏÂÒ»Ò³>")
+        #result = x.find_element_by_link_text("ä¸‹ä¸€é¡µ>")
         result.click()
         time.sleep(5)
         x.execute_script(js)
 
-    #¼ì²âÓÒÁ³
+    #æ£€æµ‹å³è„¸
     for (rx,ry,rw,rh) in profileface_rights:
         page_left=True
         close_eyes=False
@@ -62,9 +62,9 @@ while(True):
         cv2.putText(frame, "left page", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
 
     
-    #ÀûÓÃÑµ»°¶ÁÈ¡Ã¿Ò»ÕÅÈËÁ³µÄÎ»ÖÃ×ø±ê
+    #åˆ©ç”¨è®­è¯è¯»å–æ¯ä¸€å¼ äººè„¸çš„ä½ç½®åæ ‡
     for (x,y,w,h) in faces:
-    #ÓÃ¾ØĞÎ½«ÈËÁ³¿ò³öÀ´ 
+    #ç”¨çŸ©å½¢å°†äººè„¸æ¡†å‡ºæ¥ 
         cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
         roi_gray = gray[y:y+h, x:x+w]
         roi_color = frame[y:y+h, x:x+w]
@@ -80,6 +80,6 @@ while(True):
                 cv2.circle(roi_color1,(cx+int(cw/2),cy+int(ch/2)),6,(255,255,0),2)
 
     cv2.imshow('frame',frame)
-    #Èç¹û°´¼üeÔòÌø³ö±¾´ÎÑ­»·
+    #å¦‚æœæŒ‰é”®eåˆ™è·³å‡ºæœ¬æ¬¡å¾ªç¯
     if cv2.waitKey(1) == ord('e'):
         break
