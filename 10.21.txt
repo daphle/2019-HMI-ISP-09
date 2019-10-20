@@ -1,0 +1,85 @@
+import cv2
+from selenium import webdriver
+import time
+x=webdriver.Chrome(r'C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe') 
+#这是我的chromedriver的绝对路径，我是默认安装的，所以可以作为新手的参考
+x.get('http://www.baidu.com')
+
+#通过ID找网页的标签，找到搜索框的标签 ? ?
+seek_input=x.find_element_by_id("kw")
+#设置搜索的内容 ? ?
+seek_input.send_keys("天气")
+#找到搜索文档按钮 ? ?
+seek_but=x.find_element_by_id("su")
+#并点击搜索 按钮 ? ?
+seek_but.click()
+#并点击搜索 按钮 ? ?
+js="var q=document.documentElement.scrollTop=10000"
+time.sleep(2)
+x.execute_script(js)
+time.sleep(1)
+result = x.find_element_by_link_text("下一页>")
+#result.click()
+#time.sleep(2)
+
+face_cascade = cv2.CascadeClassifier(
+ 'C:/Users/52426/Desktop/haarcascade_frontalface_default.xml')
+eye_cascade = cv2.CascadeClassifier(
+ 'C:/Users/52426/Desktop/haarcascade_eye.xml')
+eye_tree_eyeglasses_cascade = cv2.CascadeClassifier(
+ 'C:/Users/52426/Desktop/haarcascade_eye_tree_eyeglasses.xml')
+profileface_cascade = cv2.CascadeClassifier(
+ 'C:/Users/52426/Desktop/haarcascade_profileface.xml')
+
+capture = cv2.VideoCapture(0)
+while(True):
+    # 获取一帧
+    ret, frame = capture.read()
+    # 将这帧转换为灰度图
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray1 = cv2.flip(gray, 1)
+    
+    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+    profilefaces = profileface_cascade.detectMultiScale(gray, 2.1, 5)
+    profileface_rights = profileface_cascade.detectMultiScale(gray1, 2, 5)
+
+    #检测左脸
+    for (px,py,pw,ph) in profilefaces:
+        page_right=True
+        close_eyes=False
+        cv2.rectangle(frame,(px,py),(px+pw,py+ph),(255,193,193),2)
+        cv2.putText(frame, "right page", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
+        #result = x.find_element_by_link_text("下一页>")
+        result.click()
+        time.sleep(5)
+        x.execute_script(js)
+
+    #检测右脸
+    for (rx,ry,rw,rh) in profileface_rights:
+        page_left=True
+        close_eyes=False
+        cv2.rectangle(frame,(640-rx,ry),(640-rx-rw,ry+rh),(153,50,204),2)
+        cv2.putText(frame, "left page", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
+
+    
+    #利用训话读取每一张人脸的位置坐标
+    for (x,y,w,h) in faces:
+    #用矩形将人脸框出来 
+        cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+        roi_gray = gray[y:y+h, x:x+w]
+        roi_color = frame[y:y+h, x:x+w]
+        eyes = eye_cascade.detectMultiScale(roi_gray)
+        for (ex,ey,ew,eh) in eyes:
+            cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
+            roi_gray1 = roi_gray[ey:ey+eh, ex:ex+ew]
+            roi_color1 = roi_color[ey:ey+eh, ex:ex+ew]
+
+            eye_tree_eyeglassess = eye_tree_eyeglasses_cascade.detectMultiScale(roi_gray1)
+
+            for (cx,cy,cw,ch) in eye_tree_eyeglassess:
+                cv2.circle(roi_color1,(cx+int(cw/2),cy+int(ch/2)),6,(255,255,0),2)
+
+    cv2.imshow('frame',frame)
+    #如果按键e则跳出本次循环
+    if cv2.waitKey(1) == ord('e'):
+        break
