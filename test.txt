@@ -28,7 +28,7 @@ page=0
 Path ='/home/xilinx/jupyter_notebooks/base/video/book/'
 img1=array(Image.open(Path+'%s.jpg'%page))
 
-#¿ªÊ¼ÏÔÊ¾µç×ÓÊé
+#å¼€å§‹æ˜¾ç¤ºç”µå­ä¹¦
 start_page = False
 
 
@@ -38,10 +38,10 @@ while (base.buttons[3].read()==0):
     
     panduan = False
     
-    #ÓÒ·­Ò³
+    #å³ç¿»é¡µ
     page_right = False
     
-    #×ó·­Ò³
+    #å·¦ç¿»é¡µ
     page_left = False
     
     
@@ -81,11 +81,11 @@ while (base.buttons[3].read()==0):
         'haarcascade_profileface.xml')
 
     gray = cv2.cvtColor(frame_vga, cv2.COLOR_BGR2GRAY)
-    #½«»Ò¶ÈÍ¼ÏñÊı×é×ªÎª»Ò¶ÈÍ¼Æ¬
+    #å°†ç°åº¦å›¾åƒæ•°ç»„è½¬ä¸ºç°åº¦å›¾ç‰‡
     gray1 = Image.fromarray(gray)
-    #·­×ªºóµÄÍ¼Æ¬
+    #ç¿»è½¬åçš„å›¾ç‰‡
     gray2 = gray1.transpose(Image.FLIP_LEFT_RIGHT)
-    #Éú³É·­×ªºóµÄÍ¼Æ¬×ªÊı×é
+    #ç”Ÿæˆç¿»è½¬åçš„å›¾ç‰‡è½¬æ•°ç»„
     gray_fanzhuan = array(gray2)
     
     
@@ -94,14 +94,14 @@ while (base.buttons[3].read()==0):
     profilefaces = profileface_cascade.detectMultiScale(gray, 2.7, 5)
     profileface_rights = profileface_cascade.detectMultiScale(gray_fanzhuan, 2.5, 5)
     
-    #¼ì²â×óÁ³
+    #æ£€æµ‹å·¦è„¸
     for (px,py,pw,ph) in profilefaces:
         page_right=True
         cv2.rectangle(frame_vga,(px,py),(px+pw,py+ph),(255,193,193),2)
         cv2.putText(frame_vga, "right page", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
         #cv2.putText(img1, "right page", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
     
-    #¼ì²âÓÒÁ³
+    #æ£€æµ‹å³è„¸
     for (rx,ry,rw,rh) in profileface_rights:
         page_left=True
         cv2.rectangle(frame_vga,(640-rx,ry),(640-rx-rw,ry+rh),(153,50,204),2)
