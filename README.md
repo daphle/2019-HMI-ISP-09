@@ -20,7 +20,7 @@ currentMouseX, currentMouseY = pyautogui.position()
 pyautogui.moveTo(screenWidth/2, screenHeight/2)
 
 driver=webdriver.Chrome(r'C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe') 
-#这是我的chromedriver的绝对路径，我是默认安装的，所以可以作为新手的参考
+#这是chromedriver的绝对路径
 driver.get('http://www.baidu.com')
 
 #通过ID找网页的标签，找到搜索框的标签    
