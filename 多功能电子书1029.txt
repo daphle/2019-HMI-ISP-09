@@ -7,7 +7,7 @@ from collections import deque
 from pymouse import PyMouse
 import pymouse
 import pyautogui
-
+from pathlib import Path
 
 
 # 获取屏幕尺寸
@@ -18,7 +18,7 @@ currentMouseX, currentMouseY = pyautogui.position()
 pyautogui.moveTo(screenWidth/2, screenHeight/2)
 
 driver=webdriver.Chrome(r'C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe') 
-#这是我的chromedriver的绝对路径，我是默认安装的，所以可以作为新手的参考
+#这是我的chromedriver的绝对路径
 driver.get('http://www.baidu.com')
 
 #通过ID找网页的标签，找到搜索框的标签    
@@ -65,7 +65,7 @@ first_w=0
 count=0
 
 capture = cv2.VideoCapture(0)
-
+pyautogui.FAILSAFE=False
 while(True):
     # 获取一帧
     ret, frame = capture.read()
@@ -82,7 +82,6 @@ while(True):
     m = pymouse.PyMouse()   # 获取鼠标指针对象
     #print(m.position())    # 获取当前鼠标指针的坐标
 
-    
     
     #检测左脸
     for (px,py,pw,ph) in profilefaces:
@@ -124,13 +123,13 @@ while(True):
         first_y=second_y
         
         #页面缩放
-        #if (second_w-first_w) > 30 :
-            #driver.fullscreen_window()
-            #cv2.putText(frame1, "max window", (10, 10), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
-        #if (first_w-second_w) > 30 :
-            #driver.set_window_size(500,500)
-            #cv2.putText(frame1, "min window", (10, 10), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
-        #first_w=second_w
+        if (second_w-first_w) > 30 and first_w != 0:
+            driver.fullscreen_window()
+            cv2.putText(frame1, "max window", (10, 10), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
+        if (first_w-second_w) > 30 and second_w != 0:
+            driver.set_window_size(500,500)
+            cv2.putText(frame1, "min window", (10, 10), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
+        first_w=second_w
         
         roi_gray = gray1[y:y+h, x:x+w]
         roi_color = frame1[y:y+h, x:x+w]
@@ -167,9 +166,22 @@ while(True):
     #连续闭眼三帧
     if eyes_close_count == 3 :
         #截图
-        html = driver.page_source          #截图
-        driver.get_screenshot_as_file('C:/Users/52426/Desktop/screenshot.jpg')
-        cv2.putText(frame1, "screenshot", (10, 10), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
+        i=1
+        scrpath='C:/Users/52426/Desktop/screenshot'  #指定的保存目录
+        capturename = '\\'+str(i) + '.png'  #自定义命名截图
+        wholepath=scrpath+capturename
+        if Path(scrpath).is_dir():  #判断文件夹路径是否已经存在
+            pass    
+        else: 
+            Path(scrpath).mkdir()   #如果不存在，创建文件夹
+        while Path(wholepath).exists():   #判断文件是否已经存在，也可使用is_file()判断
+            i+=1
+            capturename = '\\'+str(i) + '.png'
+            wholepath = scrpath+capturename
+        driver.get_screenshot_as_file(wholepath) #不能接受Path类的值，只能是字符串，否则无法截图
+        #html = driver.page_source          #截图
+        #driver.get_screenshot_as_file('C:/Users/52426/Desktop/screenshot.png')
+        cv2.putText(frame1, "screenshot"+str(i), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 1)
 
     cv2.imshow('frame',frame1)
     #如果按键e则跳出本次循环
